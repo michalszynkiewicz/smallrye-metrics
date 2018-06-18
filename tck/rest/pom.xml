@@ -30,11 +30,9 @@
   <name>SmallRye: MicroProfile Metrics TCK</name>
 
   <properties>
-    <!--mstodo:move to parent-->
-    <version.arquillian-weld-embedded>2.0.0.Beta5</version.arquillian-weld-embedded>
     <version.wildfly>13.0.0.Final</version.wildfly>
     <version.arquillian.wildfly>2.1.0.Final</version.arquillian.wildfly>
-    <version.tomcat>8.0.52</version.tomcat>
+    <version.tomcat>8.5.32</version.tomcat>
   </properties>
 
   <dependencies>
@@ -54,12 +52,12 @@
       <version>1.0.1.Final</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-servlet-initializer</artifactId>
-      <version>3.5.1.Final</version>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.jboss.resteasy</groupId>-->
+      <!--<artifactId>resteasy-servlet-initializer</artifactId>-->
+      <!--<version>3.5.1.Final</version>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-cdi</artifactId>
@@ -69,11 +67,6 @@
       <groupId>org.jboss.weld.servlet</groupId>
       <artifactId>weld-servlet</artifactId>
       <version>2.4.7.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.arquillian.junit</groupId>
-      <artifactId>arquillian-junit-container</artifactId>
-      <version>1.4.0.Final</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
