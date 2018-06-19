@@ -29,7 +29,6 @@ public class MetricsArchiveAppender implements AuxiliaryArchiveAppender {
                 MetricsHttpServlet.class.getPackage(),
                 MetricCdiInjectionExtension.class.getPackage(),
                 Metered.class.getPackage());
-        war.addPackages(true,"javax"); 
         war.addClass(MetricRegistry.Type.class);
         return war;
     }
