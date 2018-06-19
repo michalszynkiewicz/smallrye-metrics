@@ -15,15 +15,16 @@
  */
 package io.smallrye.metrics.tck.rest;
 
-import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.container.test.spi.client.deployment.AuxiliaryArchiveAppender;
+import org.jboss.arquillian.container.test.spi.client.deployment.ProtocolArchiveProcessor;
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
 public class MetricsExtension implements LoadableExtension {
 
     @Override
     public void register(ExtensionBuilder extensionBuilder) {
-        extensionBuilder.service(AuxiliaryArchiveAppender.class, MetricsArchiveProcessor.class);
+        extensionBuilder.service(AuxiliaryArchiveAppender.class, MetricsArchiveAppender.class);
+        extensionBuilder.service(ProtocolArchiveProcessor.class, MetricsArchiveProcessor.class);
     }
 
 }

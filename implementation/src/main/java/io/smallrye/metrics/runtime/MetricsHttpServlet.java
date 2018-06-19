@@ -23,7 +23,7 @@ import io.smallrye.metrics.runtime.exporters.PrometheusExporter;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
-import javax.inject.Inject;
+import javax.enterprise.inject.spi.CDI;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -85,7 +85,7 @@ public class MetricsHttpServlet extends HttpServlet {
                 return;
             }
 
-            MetricRegistry registry = registries.get(scope);
+            MetricRegistry registry = getRegistries().get(scope);
             Map<String, Metric> metricValuesMap = registry.getMetrics();
 
             if (metricValuesMap.containsKey(attribute)) {
@@ -103,7 +103,7 @@ public class MetricsHttpServlet extends HttpServlet {
                 return;
             }
 
-            MetricRegistry reg = registries.get(scope);
+            MetricRegistry reg = getRegistries().get(scope);
             if (reg.getMetadata().size() == 0) {
                 respondWith(response, 204, "No data in scope " + scopePath);
             }
@@ -170,7 +170,7 @@ public class MetricsHttpServlet extends HttpServlet {
 
 
                 if (method.equals("GET")) {
-                    exporter = new JsonExporter();
+                    exporter = new JsonExporter(getRegistries());
                 } else if (method.equals("OPTIONS")) {
                     exporter = new JsonMetadataExporter();
                 } else {
@@ -184,7 +184,7 @@ public class MetricsHttpServlet extends HttpServlet {
                     return null;
                 }
             }
-        }
+        };
         return exporter;
     }
 
@@ -200,6 +200,8 @@ public class MetricsHttpServlet extends HttpServlet {
         // TODO: Customise this generated block
     }
 
-    @Inject
-    private MetricRegistries registries;
+    // mstodo cache it?
+    private MetricRegistries getRegistries() {
+        return CDI.current().select(MetricRegistries.class).get();
+    }
 }

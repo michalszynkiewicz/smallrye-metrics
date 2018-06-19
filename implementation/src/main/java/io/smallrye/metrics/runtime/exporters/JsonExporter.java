@@ -17,7 +17,10 @@
 
 package io.smallrye.metrics.runtime.exporters;
 
+import io.smallrye.metrics.runtime.MetricRegistries;
+import io.smallrye.metrics.runtime.app.HistogramImpl;
 import io.smallrye.metrics.runtime.app.MeterImpl;
+import io.smallrye.metrics.runtime.app.TimerImpl;
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Metadata;
@@ -25,12 +28,8 @@ import org.eclipse.microprofile.metrics.Metered;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Snapshot;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.logging.Logger;
-import io.smallrye.metrics.runtime.app.HistogramImpl;
-import io.smallrye.metrics.runtime.app.TimerImpl;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,6 +43,10 @@ public class JsonExporter implements Exporter {
 
     private static final String COMMA_LF = ",\n";
     private static final String LF = "\n";
+
+    public JsonExporter(MetricRegistries registries) {
+        this.registries = registries;
+    }
 
     @Override
     public StringBuffer exportOneScope(MetricRegistry.Type scope) {
@@ -246,27 +249,9 @@ public class JsonExporter implements Exporter {
     }
 
     private MetricRegistry getRegistry(MetricRegistry.Type scope) {
-        MetricRegistry registry = null;
-        switch (scope) {
-            case APPLICATION:
-                return this.applicationRegistry;
-            case BASE:
-                return this.baseRegistry;
-            case VENDOR:
-                return this.vendorRegistry;
-        }
-        throw new IllegalArgumentException("Unsupported metric registry type: " + scope);
+        return registries.get(scope);
     }
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.BASE)
-    MetricRegistry baseRegistry;
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.VENDOR)
-    MetricRegistry vendorRegistry;
-
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry applicationRegistry;
+    private final MetricRegistries registries;
 }
