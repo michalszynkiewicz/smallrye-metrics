@@ -5,6 +5,7 @@ import org.jboss.arquillian.container.test.spi.client.deployment.ProtocolArchive
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jboss.weld.environment.deployment.discovery.BeanArchiveHandler;
 
 import java.io.File;
 
@@ -26,11 +27,14 @@ public class MetricsArchiveProcessor implements ProtocolArchiveProcessor {
         WebArchive war = (WebArchive)protocolArchive;
         war.addAsWebInfResource("WEB-INF/jboss-web.xml", "jboss-web.xml");
         String[] deps = {
-                "org.jboss.weld.servlet:weld-servlet-core",
+                "org.jboss.weld.servlet:weld-servlet",
         };
 
         File[] dependencies = Maven.resolver().loadPomFromFile(new File("pom.xml")).resolve(deps).withTransitivity().asFile();
 
         war.addAsLibraries(dependencies);
+
+        war.addClass(SmallRyeBeanArchiveHandler.class);
+        war.addAsServiceProvider(BeanArchiveHandler.class, SmallRyeBeanArchiveHandler.class);
     }
 }

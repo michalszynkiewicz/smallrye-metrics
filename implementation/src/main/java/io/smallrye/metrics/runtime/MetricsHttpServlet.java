@@ -23,7 +23,7 @@ import io.smallrye.metrics.runtime.exporters.PrometheusExporter;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
-import javax.enterprise.inject.spi.CDI;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -85,7 +85,7 @@ public class MetricsHttpServlet extends HttpServlet {
                 return;
             }
 
-            MetricRegistry registry = getRegistries().get(scope);
+            MetricRegistry registry = registries.get(scope);
             Map<String, Metric> metricValuesMap = registry.getMetrics();
 
             if (metricValuesMap.containsKey(attribute)) {
@@ -103,7 +103,7 @@ public class MetricsHttpServlet extends HttpServlet {
                 return;
             }
 
-            MetricRegistry reg = getRegistries().get(scope);
+            MetricRegistry reg = registries.get(scope);
             if (reg.getMetadata().size() == 0) {
                 respondWith(response, 204, "No data in scope " + scopePath);
             }
@@ -170,7 +170,7 @@ public class MetricsHttpServlet extends HttpServlet {
 
 
                 if (method.equals("GET")) {
-                    exporter = new JsonExporter(getRegistries());
+                    exporter = new JsonExporter(registries);
                 } else if (method.equals("OPTIONS")) {
                     exporter = new JsonMetadataExporter();
                 } else {
@@ -200,8 +200,6 @@ public class MetricsHttpServlet extends HttpServlet {
         // TODO: Customise this generated block
     }
 
-    // mstodo cache it?
-    private MetricRegistries getRegistries() {
-        return CDI.current().select(MetricRegistries.class).get();
-    }
+    @Inject
+    private MetricRegistries registries;
 }

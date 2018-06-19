@@ -24,13 +24,14 @@ public class MetricsArchiveAppender implements AuxiliaryArchiveAppender {
 
     @Override
     public Archive<?> createAuxiliaryArchive() {
-        JavaArchive war = ShrinkWrap.create(JavaArchive.class);
-        war.addPackages(true,
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class);
+        jar.addPackages(true,
                 MetricsHttpServlet.class.getPackage(),
                 MetricCdiInjectionExtension.class.getPackage(),
                 Metered.class.getPackage());
-        war.addClass(MetricRegistry.Type.class);
-        return war;
+        jar.addClass(MetricRegistry.Type.class);
+
+        return jar;
     }
 
 }
