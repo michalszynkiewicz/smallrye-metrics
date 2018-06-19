@@ -22,16 +22,11 @@ import io.smallrye.metrics.runtime.exporters.JsonMetadataExporter;
 import io.smallrye.metrics.runtime.exporters.PrometheusExporter;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,31 +36,19 @@ import java.util.Map;
 /**
  * @author hrupp
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * // mstodo register this thing
  * // mstodo: switch to servlet?
  */
-@WebFilter(filterName="MP-metrics-filter",servletNames={"MicroProfile Metrics Filter"}, urlPatterns = "/")
-public class MetricsHttpFilter implements Filter {
+@WebServlet(name = "metrics-servlet", urlPatterns = "/metrics/*", loadOnStartup = 1)
+public class MetricsHttpServlet extends HttpServlet {
 
     @Override
-    public void doFilter(ServletRequest servletRequest,
-                         ServletResponse servletResponse,
-                         FilterChain chain) throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest)
-                || !(servletResponse instanceof HttpServletResponse)) {
-            throw new RuntimeException(getClass().getName() + " works only for HttpServletRequest and HttServletResponse");
-        }
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String requestPath = request.getRequestURI();
-
-        if (!requestPath.startsWith("/metrics")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        // request is for us, so let's handle it
 
         Exporter exporter = obtainExporter(request);
         if (exporter == null) {
@@ -73,6 +56,7 @@ public class MetricsHttpFilter implements Filter {
             return;
         }
 
+        System.out.println("request path: " + requestPath);
         String scopePath = requestPath.substring(8);
         if (scopePath.startsWith("/")) {
             scopePath = scopePath.substring(1);
@@ -82,6 +66,8 @@ public class MetricsHttpFilter implements Filter {
         }
 
         StringBuffer sb;
+        
+        System.out.println("scope path: " + scopePath);
 
         if (scopePath.isEmpty()) {
             // All metrics
@@ -133,6 +119,10 @@ public class MetricsHttpFilter implements Filter {
     }
 
     private void respondWith(HttpServletResponse response, int status, String message) throws IOException {
+        if (status == 404) {                             // mstodo remove
+            System.out.println("returning 404 on purpose!");
+            Thread.dumpStack();
+        }
         response.setStatus(status);
         response.getWriter().write(message);
     }
@@ -200,8 +190,9 @@ public class MetricsHttpFilter implements Filter {
 
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        System.out.println("initializing filter\n\n\n\n\n\n");
+    public void init() throws ServletException {
+        super.init();
+        System.out.println("initializing servlet\n\n\n\n\n\n");
     }
 
     @Override

@@ -34,9 +34,10 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
+
   <modules>
     <module>api</module>
-    <!--<module>rest</module>-->
+    <module>rest</module>
   </modules>
 
   <dependencies>
