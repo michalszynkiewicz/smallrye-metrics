@@ -37,6 +37,7 @@ public class MetricsArchiveProcessor implements AuxiliaryArchiveAppender {
                 MetricCdiInjectionExtension.class.getPackage(),
                 Metered.class.getPackage());
         jar.addClass(MetricRegistry.Type.class);
+        jar.addAsResource("WEB-INF/jboss-web.xml");
         return jar;
     }
 
