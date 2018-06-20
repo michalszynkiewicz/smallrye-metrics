@@ -27,6 +27,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
+ * Copied from SmallRye Rest Client
+ *
  * Special handler for WildFly VFS urls.
  *
  * @author Martin Kouba

@@ -18,11 +18,11 @@ package io.smallrye.metrics.tck.rest;
 import org.jboss.arquillian.container.test.spi.client.deployment.ProtocolArchiveProcessor;
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
-public class MetricsExtension implements LoadableExtension {
+public class SmallRyeMetricsExtension implements LoadableExtension {
 
     @Override
     public void register(ExtensionBuilder extensionBuilder) {
-        extensionBuilder.service(ProtocolArchiveProcessor.class, MetricsArchiveProcessor.class);
+        extensionBuilder.service(ProtocolArchiveProcessor.class, SmallRyeMetricsArchiveProcessor.class);
     }
 
 }

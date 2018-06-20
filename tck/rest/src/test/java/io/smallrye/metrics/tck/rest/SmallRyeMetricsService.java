@@ -42,7 +42,7 @@ import java.util.Optional;
  * @author Heiko W. Rupp
  */
 @ApplicationScoped
-public class MetricsService {
+public class SmallRyeMetricsService {
 
     public void initialize(@Observes @Initialized(ApplicationScoped.class) Object ignored) {
         initBaseAndVendorConfiguration();
