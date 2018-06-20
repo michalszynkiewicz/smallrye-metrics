@@ -14,8 +14,13 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package io.smallrye.metrics.runtime;
+package io.smallrye.metrics.tck.rest;
 
+import io.smallrye.metrics.runtime.ConfigReader;
+import io.smallrye.metrics.runtime.ExtendedMetadata;
+import io.smallrye.metrics.runtime.JmxWorker;
+import io.smallrye.metrics.runtime.MetadataList;
+import io.smallrye.metrics.runtime.Tag;
 import io.smallrye.metrics.runtime.mbean.MCounterImpl;
 import io.smallrye.metrics.runtime.mbean.MGaugeImpl;
 import org.eclipse.microprofile.config.Config;
@@ -42,7 +47,6 @@ public class MetricsService {
 
     private static Logger LOG = Logger.getLogger("org.wildfly.swarm.microprofile.metrics");
 
-    
     public void initialize(@Observes @Initialized(ApplicationScoped.class) Object ignored) {
         // mstodo remove!
         System.out.println("Fire in the hole!");
@@ -54,7 +58,7 @@ public class MetricsService {
      * along with their metadata.
      */
     private void initBaseAndVendorConfiguration() {
-        InputStream is = getClass().getResourceAsStream("mapping.yml");
+        InputStream is = getClass().getResourceAsStream("/mapping.yml");
 
         if (is != null) {
             ConfigReader cr = new ConfigReader();

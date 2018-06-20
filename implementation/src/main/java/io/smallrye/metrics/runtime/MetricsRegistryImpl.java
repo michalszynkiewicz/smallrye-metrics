@@ -16,13 +16,11 @@
  */
 package io.smallrye.metrics.runtime;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
+import io.smallrye.metrics.runtime.app.CounterImpl;
+import io.smallrye.metrics.runtime.app.ExponentiallyDecayingReservoir;
+import io.smallrye.metrics.runtime.app.HistogramImpl;
+import io.smallrye.metrics.runtime.app.MeterImpl;
+import io.smallrye.metrics.runtime.app.TimerImpl;
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
@@ -34,11 +32,13 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.Timer;
 import org.jboss.logging.Logger;
-import io.smallrye.metrics.runtime.app.CounterImpl;
-import io.smallrye.metrics.runtime.app.ExponentiallyDecayingReservoir;
-import io.smallrye.metrics.runtime.app.HistogramImpl;
-import io.smallrye.metrics.runtime.app.MeterImpl;
-import io.smallrye.metrics.runtime.app.TimerImpl;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * mstodo: some migration from thorntail may be necessary
@@ -104,8 +104,12 @@ public class MetricsRegistryImpl extends MetricRegistry {
         if (name == null) {
             throw new IllegalArgumentException("Metric name must not be null");
         }
-
         Metadata existingMetadata = metadataMap.get(name);
+        System.out.println("["+ hashCode()+ "] Reusable: " +
+                "metric:" + metadata.getName() + "(" + metadata.isReusable() + ")" +
+                "\texisting: " + existingMetadata + "\t is existing reusable: " + (existingMetadata != null ? existingMetadata.isReusable() : "null")
+        ); // mstodo remove
+
         boolean reusableFlag = (existingMetadata == null || existingMetadata.isReusable());
 
         //Gauges are not reusable
@@ -144,6 +148,9 @@ public class MetricsRegistryImpl extends MetricRegistry {
 
     @Override
     public Histogram histogram(Metadata metadata) {
+        System.out.println("getting");
+        Thread.dumpStack();
+
         return get(metadata, MetricType.HISTOGRAM);
     }
 
@@ -184,13 +191,17 @@ public class MetricsRegistryImpl extends MetricRegistry {
                     break;
                 case INVALID:
                 default:
+                    System.out.println("throwing ise");
                     throw new IllegalStateException("Must not happen");
             }
             LOGGER.infof("Register metric [name: %s, type: %s]", name, type);
+            System.out.println("will register");
             register(metadata, m);
         } else if (!metadataMap.get(name).getTypeRaw().equals(metadata.getTypeRaw())) {
             throw new IllegalArgumentException("Previously registered metric " + name + " is of type "
                     + metadataMap.get(name).getType() + ", expected " + metadata.getType());
+        } else {
+            System.out.println("the key is there with the same type raw " + metadata.getTypeRaw());
         }
 
         return (T) metricMap.get(name);

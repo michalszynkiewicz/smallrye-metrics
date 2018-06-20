@@ -17,6 +17,7 @@
  */
 package io.smallrye.metrics.deployment;
 
+import io.smallrye.metrics.runtime.JmxWorker;
 import io.smallrye.metrics.runtime.MetricRegistries;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
@@ -80,14 +81,16 @@ public class MetricCdiInjectionExtension implements Extension {
         LOGGER.info("MicroProfile: Metrics activated");
 
         // It seems that fraction deployment module cannot be picked up as a CDI bean archive - see also SWARM-1725
+        bbd.addAnnotatedType(manager.createAnnotatedType(JmxWorker.class));
         bbd.addAnnotatedType(manager.createAnnotatedType(MetricProducer.class));
         bbd.addAnnotatedType(manager.createAnnotatedType(MetricNameFactory.class));
+        bbd.addAnnotatedType(manager.createAnnotatedType(MetricsInterceptor.class));
+        bbd.addAnnotatedType(manager.createAnnotatedType(MetricRegistries.class));
+
 
         bbd.addAnnotatedType(manager.createAnnotatedType(MeteredInterceptor.class));
         bbd.addAnnotatedType(manager.createAnnotatedType(CountedInterceptor.class));
         bbd.addAnnotatedType(manager.createAnnotatedType(TimedInterceptor.class));
-        bbd.addAnnotatedType(manager.createAnnotatedType(MetricsInterceptor.class));
-        bbd.addAnnotatedType(manager.createAnnotatedType(MetricRegistries.class));
     }
 
     private <X> void metricsAnnotations(@Observes @WithAnnotations({ Counted.class, Gauge.class, Metered.class, Timed.class }) ProcessAnnotatedType<X> pat) {

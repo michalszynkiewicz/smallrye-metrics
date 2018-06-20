@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  * Date: 6/18/18
  */
 public class MetricsArchiveAppender implements AuxiliaryArchiveAppender {
+    // mstodo remove
 
     private static Logger LOGGER = Logger.getLogger(MetricsArchiveAppender.class.getName());
 
@@ -30,6 +31,7 @@ public class MetricsArchiveAppender implements AuxiliaryArchiveAppender {
                 MetricCdiInjectionExtension.class.getPackage(),
                 Metered.class.getPackage());
         jar.addClass(MetricRegistry.Type.class);
+        jar.addAsResource("META-INF/beans.xml", "META-INF/beans.xml");
 
         return jar;
     }

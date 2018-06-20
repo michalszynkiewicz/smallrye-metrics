@@ -17,29 +17,29 @@
 
 package io.smallrye.metrics.runtime.exporters;
 
+import io.smallrye.metrics.runtime.MetricRegistries;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonWriter;
+import javax.json.stream.JsonGenerator;
 import java.io.StringWriter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
-import javax.json.stream.JsonGenerator;
-
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
-
 /**
  * Created by bob on 1/22/18.
  */
-@ApplicationScoped
 public class JsonMetadataExporter implements Exporter {
+
+    public JsonMetadataExporter(MetricRegistries registries) {
+        this.registries = registries;
+    }
 
     @Override
     public String getContentType() {
@@ -48,19 +48,9 @@ public class JsonMetadataExporter implements Exporter {
 
     @Override
     public StringBuffer exportOneScope(MetricRegistry.Type scope) {
-        MetricRegistry registry = null;
-        switch (scope) {
-            case APPLICATION:
-                registry = this.applicationRegistry;
-                break;
-            case BASE:
-                registry = this.baseRegistry;
-                break;
-            case VENDOR:
-                registry = this.vendorRegistry;
-                break;
-        }
+        MetricRegistry registry = getRegistry(scope);
         if (registry == null) {
+            System.out.println("registry for type " + scope + " is null"); // mstodo remove
             return null;
         }
 
@@ -76,18 +66,7 @@ public class JsonMetadataExporter implements Exporter {
 
     @Override
     public StringBuffer exportOneMetric(MetricRegistry.Type scope, String metricName) {
-        MetricRegistry registry = null;
-        switch (scope) {
-            case APPLICATION:
-                registry = this.applicationRegistry;
-                break;
-            case BASE:
-                registry = this.baseRegistry;
-                break;
-            case VENDOR:
-                registry = this.vendorRegistry;
-                break;
-        }
+        MetricRegistry registry = getRegistry(scope);
         if (registry == null) {
             return null;
         }
@@ -101,6 +80,10 @@ public class JsonMetadataExporter implements Exporter {
         JsonObjectBuilder builder = Json.createObjectBuilder();
         metricJSON(builder, metricName, metric);
         return stringify(builder.build());
+    }
+
+    private MetricRegistry getRegistry(MetricRegistry.Type scope) {
+        return registries.get(scope);
     }
 
     private static final Map<String, ?> JSON_CONFIG = new HashMap<String, Object>() {{
@@ -119,9 +102,9 @@ public class JsonMetadataExporter implements Exporter {
     private JsonObject rootJSON() {
         JsonObjectBuilder root = Json.createObjectBuilder();
 
-        root.add("base", registryJSON(this.baseRegistry));
-        root.add("vendor", registryJSON(this.vendorRegistry));
-        root.add("application", registryJSON(this.applicationRegistry));
+        root.add("base", registryJSON(getRegistry(MetricRegistry.Type.BASE)));
+        root.add("vendor", registryJSON(getRegistry(MetricRegistry.Type.VENDOR)));
+        root.add("application", registryJSON(getRegistry(MetricRegistry.Type.APPLICATION)));
 
         return root.build();
     }
@@ -159,23 +142,13 @@ public class JsonMetadataExporter implements Exporter {
         if (metadata.getTagsAsString() != null) {
             //obj.add("tags", metadata.getTagsAsString());
             String str = metadata.getTags().entrySet().stream()
-                    .map(e-> e.getKey() + "=" + e.getValue())
+                    .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining(","));
-            obj.add( "tags", str );
+            obj.add("tags", str);
         }
 
         return obj.build();
     }
 
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.BASE)
-    MetricRegistry baseRegistry;
-
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.VENDOR)
-    MetricRegistry vendorRegistry;
-
-    @Inject
-    @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry applicationRegistry;
+    private final MetricRegistries registries;
 }

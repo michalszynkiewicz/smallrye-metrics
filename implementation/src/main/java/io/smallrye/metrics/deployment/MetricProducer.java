@@ -17,18 +17,6 @@
  */
 package io.smallrye.metrics.deployment;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
@@ -39,6 +27,15 @@ import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.Timer;
 import org.eclipse.microprofile.metrics.annotation.Metric;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author hrupp
@@ -58,18 +55,17 @@ public class MetricProducer {
     @PostConstruct
     void init() {
         registries = new ConcurrentHashMap<>();
+        System.out.println("started metric producer");
     }
 
     @Produces
     <T> Gauge<T> getGauge(InjectionPoint ip) {
         // A forwarding Gauge must be returned as the Gauge creation happens when the declaring bean gets instantiated and the corresponding Gauge can be injected before which leads to producing a null value
-        return new Gauge<T>() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public T getValue() {
-                // TODO: better error report when the gauge doesn't exist
-                return ((Gauge<T>) applicationRegistry.getGauges().get(metricName.of(ip))).getValue();
-            }
+        return () -> {
+            // TODO: better error report when the gauge doesn't exist
+            SortedMap<String, Gauge> gauges = applicationRegistry.getGauges();
+            String name = metricName.of(ip);
+            return ((Gauge<T>) gauges.get(name)).getValue();
         };
     }
 

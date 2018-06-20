@@ -17,10 +17,11 @@
 
 package io.smallrye.metrics.runtime.exporters;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import io.smallrye.metrics.runtime.MetricRegistries;
+import io.smallrye.metrics.runtime.Tag;
+import io.smallrye.metrics.runtime.app.HistogramImpl;
+import io.smallrye.metrics.runtime.app.MeterImpl;
+import io.smallrye.metrics.runtime.app.TimerImpl;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.metrics.Counter;
@@ -33,21 +34,17 @@ import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Snapshot;
 import org.jboss.logging.Logger;
-import io.smallrye.metrics.runtime.MetricRegistries;
-import io.smallrye.metrics.runtime.Tag;
-import io.smallrye.metrics.runtime.app.HistogramImpl;
-import io.smallrye.metrics.runtime.app.MeterImpl;
-import io.smallrye.metrics.runtime.app.TimerImpl;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Export data in Prometheus text format
  *
  * @author Heiko W. Rupp
  */
-@ApplicationScoped
 public class PrometheusExporter implements Exporter {
 
     // This allows to suppress the (noisy) # HELP line
@@ -65,7 +62,8 @@ public class PrometheusExporter implements Exporter {
 
     private boolean writeHelpLine;
 
-    public PrometheusExporter() {
+    public PrometheusExporter(MetricRegistries registries) {
+        this.registries = registries;
         Config config = ConfigProvider.getConfig();
         Optional<Boolean> tmp = config.getOptionalValue(SWARM_MICROPROFILE_METRICS_OMIT_HELP_LINE, Boolean.class);
         writeHelpLine = !tmp.isPresent() || !tmp.get();
@@ -366,6 +364,5 @@ public class PrometheusExporter implements Exporter {
         return in.replaceAll("(.)(\\p{Upper})", "$1_$2").toLowerCase();
     }
 
-    @Inject
-    private MetricRegistries registries;
+    private final MetricRegistries registries;
 }

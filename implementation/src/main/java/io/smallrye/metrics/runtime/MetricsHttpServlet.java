@@ -36,9 +36,9 @@ import java.util.Map;
 /**
  * @author hrupp
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
- * // mstodo: switch to servlet?
  */
 @WebServlet(name = "metrics-servlet", urlPatterns = "/metrics/*", loadOnStartup = 1)
+// mstodo should be possible to skip loadOnStartup
 public class MetricsHttpServlet extends HttpServlet {
 
     @Override
@@ -56,7 +56,6 @@ public class MetricsHttpServlet extends HttpServlet {
             return;
         }
 
-        System.out.println("request path: " + requestPath);
         String scopePath = requestPath.substring(8);
         if (scopePath.startsWith("/")) {
             scopePath = scopePath.substring(1);
@@ -66,9 +65,6 @@ public class MetricsHttpServlet extends HttpServlet {
         }
 
         StringBuffer sb;
-        
-        System.out.println("scope path: " + scopePath);
-
         if (scopePath.isEmpty()) {
             // All metrics
 
@@ -91,7 +87,8 @@ public class MetricsHttpServlet extends HttpServlet {
             if (metricValuesMap.containsKey(attribute)) {
                 sb = exporter.exportOneMetric(scope, attribute);
             } else {
-                respondWith(response, 404, "Metric " + scopePath + " not found");
+                // mstodo bring back message
+                respondWith(response, 404, "Metric " + scope + " - " + attribute + " not found");
                 return;
             }
         } else {
@@ -120,7 +117,7 @@ public class MetricsHttpServlet extends HttpServlet {
 
     private void respondWith(HttpServletResponse response, int status, String message) throws IOException {
         if (status == 404) {                             // mstodo remove
-            System.out.println("returning 404 on purpose!");
+            System.out.println("returning 404 on purpose! " + message);
             Thread.dumpStack();
         }
         response.setStatus(status);
@@ -160,7 +157,7 @@ public class MetricsHttpServlet extends HttpServlet {
 
         if (acceptHeaders == null) {
             if (method.equals("GET")) {
-                exporter = new PrometheusExporter();
+                exporter = new PrometheusExporter(registries);
             } else {
                 return null;
             }
@@ -172,14 +169,14 @@ public class MetricsHttpServlet extends HttpServlet {
                 if (method.equals("GET")) {
                     exporter = new JsonExporter(registries);
                 } else if (method.equals("OPTIONS")) {
-                    exporter = new JsonMetadataExporter();
+                    exporter = new JsonMetadataExporter(registries);
                 } else {
                     return null;
                 }
             } else {
                 // This is the fallback, but only for GET, as Prometheus does not support OPTIONS
                 if (method.equals("GET")) {
-                    exporter = new PrometheusExporter();
+                    exporter = new PrometheusExporter(registries);
                 } else {
                     return null;
                 }
@@ -188,12 +185,6 @@ public class MetricsHttpServlet extends HttpServlet {
         return exporter;
     }
 
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        System.out.println("initializing servlet\n\n\n\n\n\n");
-    }
 
     @Override
     public void destroy() {

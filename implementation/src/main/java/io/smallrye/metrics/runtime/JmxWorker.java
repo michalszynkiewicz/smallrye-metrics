@@ -118,7 +118,7 @@ public class JmxWorker {
      *
      * @param entries List of entries
      */
-    void expandMultiValueEntries(List<ExtendedMetadata> entries) {
+    public void expandMultiValueEntries(List<ExtendedMetadata> entries) {
         List<ExtendedMetadata> result = new ArrayList<>();
         List<Metadata> toBeRemoved = new ArrayList<>(entries.size());
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
