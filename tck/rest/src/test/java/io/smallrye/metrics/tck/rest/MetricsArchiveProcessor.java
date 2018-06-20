@@ -42,8 +42,5 @@ public class MetricsArchiveProcessor implements ProtocolArchiveProcessor {
         war.addAsServiceProvider(BeanArchiveHandler.class, SmallRyeBeanArchiveHandler.class);
         war.addAsServiceProvider(Extension.class, ConfigExtension.class);
         war.addAsServiceProvider(ConfigProviderResolver.class, SmallRyeConfigProviderResolver.class);
-
-//        JavaArchive jar = ShrinkWrap.create(JavaArchive.class);
-//        jar.addAsResource("META-INF/beans.xml", "META-INF/beans.xml");
     }
 }

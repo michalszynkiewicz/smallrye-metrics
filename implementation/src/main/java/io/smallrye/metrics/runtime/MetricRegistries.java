@@ -16,15 +16,14 @@
  */
 package io.smallrye.metrics.runtime;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
-
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author hrupp
@@ -59,16 +58,9 @@ public class MetricRegistries {
     }
 
     public MetricRegistry get(MetricRegistry.Type type) {
-        synchronized (registries) {
-            if (registries.get(type) == null) {
-                MetricRegistry result = new MetricsRegistryImpl(type);
-                registries.put(type, result);
-            }
-        }
-
-        return registries.get(type);
+        return registries.computeIfAbsent(type, (t) -> new MetricsRegistryImpl());
     }
 
-    private final Map<MetricRegistry.Type, MetricRegistry> registries = new HashMap<>();
+    private final Map<MetricRegistry.Type, MetricRegistry> registries = new ConcurrentHashMap<>();
 
 }

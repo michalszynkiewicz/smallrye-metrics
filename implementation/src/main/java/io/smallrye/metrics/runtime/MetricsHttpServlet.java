@@ -67,7 +67,6 @@ public class MetricsHttpServlet extends HttpServlet {
         StringBuffer sb;
         if (scopePath.isEmpty()) {
             // All metrics
-
             sb = exporter.exportAllScopes();
 
         } else if (scopePath.contains("/")) {
@@ -116,10 +115,6 @@ public class MetricsHttpServlet extends HttpServlet {
     }
 
     private void respondWith(HttpServletResponse response, int status, String message) throws IOException {
-        if (status == 404) {                             // mstodo remove
-            System.out.println("returning 404 on purpose! " + message);
-            Thread.dumpStack();
-        }
         response.setStatus(status);
         response.getWriter().write(message);
     }

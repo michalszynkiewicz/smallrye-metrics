@@ -22,7 +22,6 @@ public class MetricsExtension implements LoadableExtension {
 
     @Override
     public void register(ExtensionBuilder extensionBuilder) {
-//        extensionBuilder.service(AuxiliaryArchiveAppender.class, MetricsArchiveAppender.class);
         extensionBuilder.service(ProtocolArchiveProcessor.class, MetricsArchiveProcessor.class);
     }
 

@@ -18,8 +18,9 @@
 package io.smallrye.metrics.deployment;
 
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Member;
+import org.eclipse.microprofile.metrics.Meter;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.annotation.Metered;
 
 import javax.annotation.Priority;
 import javax.enterprise.inject.Intercepted;
@@ -30,11 +31,8 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.AroundTimeout;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-
-import org.eclipse.microprofile.metrics.Meter;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.annotation.Metered;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 
 @SuppressWarnings("unused")
 @Metered
@@ -49,8 +47,7 @@ import org.eclipse.microprofile.metrics.annotation.RegistryType;
     private final MetricResolver resolver;
 
     @Inject
-    // mstodo remove @RegistryType
-    private MeteredInterceptor(@Intercepted Bean<?> bean, @RegistryType(type = MetricRegistry.Type.APPLICATION) MetricRegistry registry) {
+    private MeteredInterceptor(@Intercepted Bean<?> bean, MetricRegistry registry) {
         this.bean = bean;
         this.registry = registry;
         this.resolver = new MetricResolver();

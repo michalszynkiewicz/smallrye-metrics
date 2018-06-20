@@ -28,7 +28,6 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
-import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
@@ -45,11 +44,7 @@ import java.util.Optional;
 @ApplicationScoped
 public class MetricsService {
 
-    private static Logger LOG = Logger.getLogger("org.wildfly.swarm.microprofile.metrics");
-
     public void initialize(@Observes @Initialized(ApplicationScoped.class) Object ignored) {
-        // mstodo remove!
-        System.out.println("Fire in the hole!");
         initBaseAndVendorConfiguration();
     }
 

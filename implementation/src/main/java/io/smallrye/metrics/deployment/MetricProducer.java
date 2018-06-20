@@ -17,6 +17,7 @@
  */
 package io.smallrye.metrics.deployment;
 
+import io.smallrye.metrics.runtime.OriginTrackedMetadata;
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.Histogram;
@@ -55,7 +56,6 @@ public class MetricProducer {
     @PostConstruct
     void init() {
         registries = new ConcurrentHashMap<>();
-        System.out.println("started metric producer");
     }
 
     @Produces
@@ -89,23 +89,8 @@ public class MetricProducer {
         return this.applicationRegistry.timer(getMetadata(ip, MetricType.TIMER));
     }
 
-//    private MetricRegistry get(MetricRegistry.Type type) {
-//        return registries.computeIfAbsent(type, key -> {
-//            try {
-//                InitialContext context = new InitialContext();
-//                Object o = context.lookup("jboss/swarm/metrics");
-//                RegistryFactory factory = (RegistryFactory) o;
-//                return factory.get(type);
-//            } catch (NamingException e) {
-//                throw new IllegalStateException("RegistryFactory not found");
-//            }
-//        });
-//    }
-
-
-
     private Metadata getMetadata(InjectionPoint ip, MetricType type) {
-        Metadata metadata = new Metadata(metricName.of(ip), type);
+        Metadata metadata = new OriginTrackedMetadata(ip, metricName.of(ip), type);
         Metric metric = ip.getAnnotated().getAnnotation(Metric.class);
         if (metric != null) {
             if (!metric.unit().isEmpty()) {

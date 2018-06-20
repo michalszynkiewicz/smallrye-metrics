@@ -16,21 +16,26 @@
 
 package io.smallrye.metrics.deployment;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import io.smallrye.metrics.runtime.OriginTrackedMetadata;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Gauge;
+import org.eclipse.microprofile.metrics.annotation.Metered;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.jboss.logging.Logger;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.interceptor.AroundConstruct;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.annotation.Gauge;
-import org.jboss.logging.Logger;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 @SuppressWarnings("unused")
 @Interceptor
@@ -57,7 +62,7 @@ import org.jboss.logging.Logger;
         Class<?> bean = context.getConstructor().getDeclaringClass();
         LOGGER.infof("MetricsInterceptor, bean=%s\n", bean);
         // Registers the bean constructor metrics
-        MetricsMetadata.registerMetrics(registry, resolver, bean, context.getConstructor());
+        registerMetrics(bean, context.getConstructor());
 
         // Registers the methods metrics over the bean type hierarchy
         Class<?> type = bean;
@@ -65,7 +70,7 @@ import org.jboss.logging.Logger;
             // TODO: discover annotations declared on implemented interfaces
             for (Method method : type.getDeclaredMethods()) {
                 if (!method.isSynthetic() && !Modifier.isPrivate(method.getModifiers())) {
-                    MetricsMetadata.registerMetrics(registry, resolver, bean, method);
+                    registerMetrics(bean, method);
                 }
             }
             type = type.getSuperclass();
@@ -81,7 +86,7 @@ import org.jboss.logging.Logger;
                 MetricResolver.Of<Gauge> gauge = resolver.gauge(bean, method);
                 if (gauge.isPresent()) {
                     Gauge g = gauge.metricAnnotation();
-                    Metadata metadata = MetricsMetadata.getMetadata(gauge.metricName(), g.unit(), g.description(), g.displayName(), MetricType.GAUGE, g.tags());
+                    Metadata metadata = getMetadata(g, gauge.metricName(), g.unit(), g.description(), g.displayName(), MetricType.GAUGE, false, g.tags());
                     registry.register(metadata, new ForwardingGauge(method, context.getTarget()));
                 }
             }
@@ -89,6 +94,53 @@ import org.jboss.logging.Logger;
         } while (!Object.class.equals(type));
 
         return target;
+    }
+
+    private <E extends Member & AnnotatedElement> void registerMetrics(Class<?> bean, E element) {
+        MetricResolver.Of<Counted> counted = resolver.counted(bean, element);
+        if (counted.isPresent()) {
+            Counted t = counted.metricAnnotation();
+            Metadata metadata = getMetadata(t, counted.metricName(), t.unit(), t.description(), t.displayName(), MetricType.COUNTER, t.reusable(), t.tags());
+
+            registry.counter(metadata);
+        }
+
+
+        MetricResolver.Of<Metered> metered = resolver.metered(bean, element);
+        if (metered.isPresent()) {
+            Metered t = metered.metricAnnotation();
+            Metadata metadata = getMetadata(t, metered.metricName(), t.unit(), t.description(), t.displayName(), MetricType.METERED, t.reusable(), t.tags());
+
+            registry.meter(metadata);
+        }
+
+        MetricResolver.Of<Timed> timed = resolver.timed(bean, element);
+        if (timed.isPresent()) {
+            Timed t = timed.metricAnnotation();
+            Metadata metadata = getMetadata(t, timed.metricName(), t.unit(), t.description(), t.displayName(), MetricType.TIMER, t.reusable(), t.tags());
+            registry.timer(metadata);
+        }
+    }
+
+    private Metadata getMetadata(Object origin, String name, String unit, String description, String displayName, MetricType type, boolean reusable, String... tags) {
+
+        Metadata metadata = new OriginTrackedMetadata(origin, name, type);
+        if (!unit.isEmpty()) {
+            metadata.setUnit(unit);
+        }
+        if (!description.isEmpty()) {
+            metadata.setDescription(description);
+        }
+        if (!displayName.isEmpty()) {
+            metadata.setDisplayName(displayName);
+        }
+        metadata.setReusable(reusable);
+        if (tags != null && tags.length > 0) {
+            for (String tag : tags) {
+                metadata.addTags(tag);
+            }
+        }
+        return metadata;
     }
 
     private static Object invokeMethod(Method method, Object object) {

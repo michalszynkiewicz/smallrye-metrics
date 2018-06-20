@@ -200,13 +200,9 @@ public class JsonExporter implements Exporter {
         StringBuffer sb = new StringBuffer();
         sb.append("{");
 
-        MetricRegistry.Type[] values = MetricRegistry.Type.values();
-
         boolean first = true;
-        for (int i = 0; i < values.length; i++) {
-            MetricRegistry.Type scope = values[i];
+        for (MetricRegistry.Type scope : MetricRegistry.Type.values()) {
             MetricRegistry registry = getRegistry(scope);
-
             if (registry.getNames().size() > 0) {
                 if (!first) {
                     sb.append(",");

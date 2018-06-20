@@ -50,7 +50,6 @@ public class JsonMetadataExporter implements Exporter {
     public StringBuffer exportOneScope(MetricRegistry.Type scope) {
         MetricRegistry registry = getRegistry(scope);
         if (registry == null) {
-            System.out.println("registry for type " + scope + " is null"); // mstodo remove
             return null;
         }
 

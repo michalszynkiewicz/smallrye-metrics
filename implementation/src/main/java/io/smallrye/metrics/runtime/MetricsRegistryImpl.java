@@ -33,6 +33,8 @@ import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.Timer;
 import org.jboss.logging.Logger;
 
+import javax.enterprise.inject.Vetoed;
+import javax.enterprise.inject.spi.InjectionPoint;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,18 +46,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * mstodo: some migration from thorntail may be necessary
  * @author hrupp
  */
+@Vetoed
 public class MetricsRegistryImpl extends MetricRegistry {
 
     private static final Logger LOGGER = Logger.getLogger(MetricsRegistryImpl.class);
 
-    private final Type type;
-
     private Map<String, Metadata> metadataMap = new HashMap<>();
     private Map<String, Metric> metricMap = new ConcurrentHashMap<>();
-
-    public MetricsRegistryImpl(MetricRegistry.Type type) {
-        this.type = type;
-    }
 
     @Override
     public <T extends Metric> T register(String name, T metric) throws IllegalArgumentException {
@@ -105,10 +102,6 @@ public class MetricsRegistryImpl extends MetricRegistry {
             throw new IllegalArgumentException("Metric name must not be null");
         }
         Metadata existingMetadata = metadataMap.get(name);
-        System.out.println("["+ hashCode()+ "] Reusable: " +
-                "metric:" + metadata.getName() + "(" + metadata.isReusable() + ")" +
-                "\texisting: " + existingMetadata + "\t is existing reusable: " + (existingMetadata != null ? existingMetadata.isReusable() : "null")
-        ); // mstodo remove
 
         boolean reusableFlag = (existingMetadata == null || existingMetadata.isReusable());
 
@@ -125,10 +118,32 @@ public class MetricsRegistryImpl extends MetricRegistry {
             throw new IllegalArgumentException("Passed metric type does not match existing type");
         }
 
+        if (existingMetadata != null && (existingMetadata.isReusable() != metadata.isReusable())) {
+            throw new IllegalArgumentException("Reusable flag differs from previous usage");
+        }
+
         metricMap.put(name, metric);
-        metadataMap.put(name, metadata);
+        metadataMap.put(name, duplicate(metadata));
 
         return metric;
+    }
+
+    protected Metadata duplicate(Metadata meta) {
+        Metadata copy = null;
+        if (meta instanceof OriginTrackedMetadata) {
+            copy = new OriginTrackedMetadata(((OriginTrackedMetadata) meta).getOrigin(), meta.getName(), meta.getTypeRaw());
+        } else {
+            copy = new Metadata(meta.getName(), meta.getTypeRaw());
+        }
+        copy.setDescription(meta.getDescription());
+        copy.setUnit(meta.getUnit());
+        copy.setDisplayName(meta.getDisplayName());
+        copy.setReusable(meta.isReusable());
+
+        HashMap<String, String> tagsCopy = new HashMap<>();
+        tagsCopy.putAll(meta.getTags());
+        copy.setTags(tagsCopy);
+        return copy;
     }
 
     @Override
@@ -148,9 +163,6 @@ public class MetricsRegistryImpl extends MetricRegistry {
 
     @Override
     public Histogram histogram(Metadata metadata) {
-        System.out.println("getting");
-        Thread.dumpStack();
-
         return get(metadata, MetricType.HISTOGRAM);
     }
 
@@ -171,7 +183,9 @@ public class MetricsRegistryImpl extends MetricRegistry {
             throw new IllegalArgumentException("Name must not be null or empty");
         }
 
-        if (!metadataMap.containsKey(name)) {
+        Metadata previous = metadataMap.get(name);
+
+        if (previous == null) {
             Metric m;
             switch (type) {
 
@@ -191,20 +205,41 @@ public class MetricsRegistryImpl extends MetricRegistry {
                     break;
                 case INVALID:
                 default:
-                    System.out.println("throwing ise");
                     throw new IllegalStateException("Must not happen");
             }
             LOGGER.infof("Register metric [name: %s, type: %s]", name, type);
-            System.out.println("will register");
             register(metadata, m);
-        } else if (!metadataMap.get(name).getTypeRaw().equals(metadata.getTypeRaw())) {
+        } else if (!previous.getTypeRaw().equals(metadata.getTypeRaw())) {
             throw new IllegalArgumentException("Previously registered metric " + name + " is of type "
-                    + metadataMap.get(name).getType() + ", expected " + metadata.getType());
-        } else {
-            System.out.println("the key is there with the same type raw " + metadata.getTypeRaw());
+                    + previous.getType() + ", expected " + metadata.getType());
+        } else if ( haveCompatibleOrigins(previous, metadata)) {
+            // stop caring, same thing.
+        } else if (previous.isReusable() && !metadata.isReusable()) {
+            throw new IllegalArgumentException("Previously registered metric " + name + " was flagged as reusable, while current request is not.");
+        } else if (!previous.isReusable()) {
+            throw new IllegalArgumentException("Previously registered metric " + name + " was not flagged as reusable");
         }
 
         return (T) metricMap.get(name);
+    }
+
+    private boolean haveCompatibleOrigins(Metadata left, Metadata right) {
+        if ( left instanceof OriginTrackedMetadata && right instanceof OriginTrackedMetadata ) {
+            OriginTrackedMetadata leftOrigin = (OriginTrackedMetadata) left;
+            OriginTrackedMetadata rightOrigin = (OriginTrackedMetadata) right;
+
+            if ( leftOrigin.getOrigin().equals(rightOrigin.getOrigin())) {
+                return true;
+            }
+
+            if ( leftOrigin.getOrigin() instanceof InjectionPoint || ((OriginTrackedMetadata) right).getOrigin() instanceof InjectionPoint ) {
+                return true;
+            }
+
+        }
+
+        return false;
+
     }
 
     @Override
