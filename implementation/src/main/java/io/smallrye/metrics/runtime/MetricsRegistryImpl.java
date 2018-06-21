@@ -43,7 +43,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * mstodo: some migration from thorntail may be necessary
  * @author hrupp
  */
 @Vetoed

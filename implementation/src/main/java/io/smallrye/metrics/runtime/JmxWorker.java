@@ -45,8 +45,6 @@ public class JmxWorker {
     private MBeanServer mbs;
     private Logger LOG = Logger.getLogger("org.wildfly.swarm.microprofile.metrics");
 
-    public JmxWorker() { /* singleton */ } // mstodo bring back private?
-
     @PostConstruct
     void init() {
         this.mbs = ManagementFactory.getPlatformMBeanServer();

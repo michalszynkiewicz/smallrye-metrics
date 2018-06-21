@@ -37,8 +37,7 @@ import java.util.Map;
  * @author hrupp
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  */
-@WebServlet(name = "metrics-servlet", urlPatterns = "/metrics/*", loadOnStartup = 1)
-// mstodo should be possible to skip loadOnStartup
+@WebServlet(name = "metrics-servlet", urlPatterns = "/metrics/*")
 public class MetricsHttpServlet extends HttpServlet {
 
     @Override
@@ -86,8 +85,7 @@ public class MetricsHttpServlet extends HttpServlet {
             if (metricValuesMap.containsKey(attribute)) {
                 sb = exporter.exportOneMetric(scope, attribute);
             } else {
-                // mstodo bring back message
-                respondWith(response, 404, "Metric " + scope + " - " + attribute + " not found");
+                respondWith(response, 404, "Metric " + scopePath + " not found");
                 return;
             }
         } else {
@@ -178,12 +176,6 @@ public class MetricsHttpServlet extends HttpServlet {
             }
         };
         return exporter;
-    }
-
-
-    @Override
-    public void destroy() {
-        // TODO: Customise this generated block
     }
 
     @Inject

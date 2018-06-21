@@ -16,19 +16,16 @@
 package io.smallrye.metrics.deployment;
 
 
-import java.util.Collections;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
+import java.util.Collections;
 
-//@Dependent
 @ApplicationScoped
 /* package-private */ class MetricNameFactory {
 
     @Produces
     @ApplicationScoped
-    // TODO: should be declared @ApplicationScoped when WELD-2083 is fixed
     private MetricName metricName(BeanManager manager) {
         return new SeMetricName(Collections.emptySet()); // TODO
     }

@@ -31,10 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 public class MetricRegistries {
 
-    public MetricRegistries() { // mstodo try bring back private?
-        /* Singleton */
-    }
-
     @Produces
     @Default
     @RegistryType(type = MetricRegistry.Type.APPLICATION)
