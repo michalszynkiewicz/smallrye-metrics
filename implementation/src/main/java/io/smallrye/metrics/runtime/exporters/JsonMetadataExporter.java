@@ -113,9 +113,7 @@ public class JsonMetadataExporter implements Exporter {
         Map<String, Metadata> metrics = registry.getMetadata();
         metrics.entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey))
-                .forEach(e -> {
-                    metricJSON(registryJSON, e.getKey(), e.getValue());
-                });
+                .forEach(e -> metricJSON(registryJSON, e.getKey(), e.getValue()));
         return registryJSON.build();
     }
 

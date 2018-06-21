@@ -17,22 +17,18 @@
 package io.smallrye.metrics.runtime;
 
 import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.jboss.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,23 +45,6 @@ public class JmxWorker {
     void init() {
         this.mbs = ManagementFactory.getPlatformMBeanServer();
     }
-
-    public Map<String, Double> getMetrics(MetricRegistry.Type scope) {
-
-        Map<String, Metadata> metadataMap = this.registries.get(scope).getMetadata();
-        Map<String, Double> outcome = new HashMap<>();
-
-        for (Metadata m : metadataMap.values()) {
-            if (!(m instanceof ExtendedMetadata)) {
-                throw new IllegalStateException("Not extended Metadata " + m);
-            }
-            ExtendedMetadata em = (ExtendedMetadata) m;
-            Double val = getValue(em.getMbean()).doubleValue();
-            outcome.put(em.getName(), val);
-        }
-        return outcome;
-    }
-
 
     /**
      * Read a value from the MBeanServer
@@ -179,7 +158,4 @@ public class JmxWorker {
         }
         return keyHolder;
     }
-
-    @Inject
-    MetricRegistries registries;
 }

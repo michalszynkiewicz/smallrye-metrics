@@ -43,7 +43,6 @@ import javax.enterprise.inject.spi.ProcessProducerField;
 import javax.enterprise.inject.spi.ProcessProducerMethod;
 import javax.enterprise.inject.spi.WithAnnotations;
 import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -66,9 +65,6 @@ public class MetricCdiInjectionExtension implements Extension {
     };
 
     private final Map<Bean<?>, AnnotatedMember<?>> metrics = new HashMap<>();
-
-    @Inject
-    MetricRegistry registry;
 
     private final List<Class<?>> metricsInterfaces;
 

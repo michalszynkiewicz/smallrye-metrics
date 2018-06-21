@@ -66,7 +66,7 @@ public class TagsTest {
     }
 
     @Test
-    public void testFromMap() throws Exception {
+    public void testFromMap() {
         Map<String, String> map = new HashMap<>(2);
         map.put("key", "myKey");
         map.put("value", "myValue");

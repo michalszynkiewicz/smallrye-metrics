@@ -29,14 +29,11 @@ import org.eclipse.microprofile.metrics.Timer;
 import org.eclipse.microprofile.metrics.annotation.Metric;
 import org.eclipse.microprofile.metrics.annotation.RegistryType;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author hrupp
@@ -50,13 +47,6 @@ public class MetricProducer {
 
     @Inject
     private MetricName metricName;
-
-    private ConcurrentMap<MetricRegistry.Type, MetricRegistry> registries;
-
-    @PostConstruct
-    void init() {
-        registries = new ConcurrentHashMap<>();
-    }
 
     @Produces
     <T> Gauge<T> getGauge(InjectionPoint ip) {
