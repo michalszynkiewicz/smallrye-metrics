@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.smallrye.metrics.deployment;
+package io.smallrye.metrics;
 
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import java.util.Collections;
+/* package-private */ enum MetricsParameter {
 
-@ApplicationScoped
-/* package-private */ class MetricNameFactory {
-
-    @Produces
-    @ApplicationScoped
-    private MetricName metricName(BeanManager manager) {
-        return new SeMetricName(Collections.emptySet()); // TODO
-    }
+    useAbsoluteName
 }

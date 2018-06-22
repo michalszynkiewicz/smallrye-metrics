@@ -24,6 +24,7 @@ import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
 import javax.inject.Inject;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -175,6 +176,11 @@ public class MetricsHttpServlet extends HttpServlet {
             }
         };
         return exporter;
+    }
+
+    @Override
+    public void init() throws ServletException {
+        System.out.println("starting metrics http servlet"); // mstodo remove
     }
 
     @Inject

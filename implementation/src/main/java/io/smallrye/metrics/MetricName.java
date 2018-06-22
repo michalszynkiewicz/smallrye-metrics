@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.smallrye.metrics.deployment;
+package io.smallrye.metrics;
 
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-/* package-private */ interface MetricName {
+public interface MetricName { /*mstodo: bring back package-local?*/
 
     String of(InjectionPoint point);
 

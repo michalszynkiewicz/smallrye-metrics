@@ -15,7 +15,7 @@
  *   limitations under the License.
  *
  */
-package io.smallrye.metrics.deployment;
+package io.smallrye.metrics;
 
 import io.smallrye.metrics.runtime.JmxWorker;
 import io.smallrye.metrics.runtime.MetricRegistries;
