@@ -51,6 +51,7 @@ public class SmallRyeMetricsArchiveProcessor implements ProtocolArchiveProcessor
         war.addAsLibraries(dependencies);
 
         war.addClass(SmallRyeBeanArchiveHandler.class);
+        war.addClass(MetricsHttpServlet.class);
         war.addClass(BaseMetricsInitializer.class);
         war.addAsResource("io/smallrye/metrics/mapping.yml", "io/smallrye/metrics/mapping.yml");
         war.addAsServiceProvider(BeanArchiveHandler.class, SmallRyeBeanArchiveHandler.class);

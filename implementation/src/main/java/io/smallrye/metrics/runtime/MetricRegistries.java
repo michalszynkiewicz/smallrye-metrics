@@ -53,10 +53,10 @@ public class MetricRegistries {
         return get(MetricRegistry.Type.VENDOR);
     }
 
-    public MetricRegistry get(MetricRegistry.Type type) {
+    public static MetricRegistry get(MetricRegistry.Type type) {
         return registries.computeIfAbsent(type, (t) -> new MetricsRegistryImpl());
     }
 
-    private final Map<MetricRegistry.Type, MetricRegistry> registries = new ConcurrentHashMap<>();
+    private static final Map<MetricRegistry.Type, MetricRegistry> registries = new ConcurrentHashMap<>();
 
 }
