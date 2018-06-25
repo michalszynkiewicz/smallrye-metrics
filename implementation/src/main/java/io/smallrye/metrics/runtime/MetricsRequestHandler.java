@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates
+ * and other contributors as indicated by the @author tags.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 package io.smallrye.metrics.runtime;
 
 import io.smallrye.metrics.runtime.exporters.Exporter;
@@ -8,7 +24,6 @@ import org.eclipse.microprofile.metrics.Metric;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,14 +31,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * mstodo: Header
- *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
  * Date: 6/25/18
  */
 @ApplicationScoped
-public class MetricsEndpointBase {
+public class MetricsRequestHandler {
 
     private static final Map<String, String> corsHeaders;
 
@@ -69,7 +82,7 @@ public class MetricsEndpointBase {
                 return;
             }
 
-            MetricRegistry registry = registries.get(scope);
+            MetricRegistry registry = MetricRegistries.get(scope);
             Map<String, Metric> metricValuesMap = registry.getMetrics();
 
             if (metricValuesMap.containsKey(attribute)) {
@@ -87,7 +100,7 @@ public class MetricsEndpointBase {
                 return;
             }
 
-            MetricRegistry reg = registries.get(scope);
+            MetricRegistry reg = MetricRegistries.get(scope);
             if (reg.getMetadata().size() == 0) {
                 responder.respondWith( 204, "No data in scope " + scopePath, Collections.emptyMap());
             }
@@ -127,27 +140,26 @@ public class MetricsEndpointBase {
 
         if (acceptHeaders == null) {
             if (method.equals("GET")) {
-                exporter = new PrometheusExporter(registries);
+                exporter = new PrometheusExporter();
             } else {
                 return null;
             }
         } else {
             // Header can look like "application/json, text/plain, */*"
-            // mstodo simplify below
             if (acceptHeaders.findFirst().map(e -> e.startsWith("application/json")).orElse(false)) {
 
 
                 if (method.equals("GET")) {
-                    exporter = new JsonExporter(registries);
+                    exporter = new JsonExporter();
                 } else if (method.equals("OPTIONS")) {
-                    exporter = new JsonMetadataExporter(registries);
+                    exporter = new JsonMetadataExporter();
                 } else {
                     return null;
                 }
             } else {
                 // This is the fallback, but only for GET, as Prometheus does not support OPTIONS
                 if (method.equals("GET")) {
-                    exporter = new PrometheusExporter(registries);
+                    exporter = new PrometheusExporter();
                 } else {
                     return null;
                 }
@@ -155,10 +167,6 @@ public class MetricsEndpointBase {
         };
         return exporter;
     }
-
-    @Inject
-    private MetricRegistries registries;
-
 
     public interface Responder {
         void respondWith(int status, String message, Map<String, String> headers) throws IOException;

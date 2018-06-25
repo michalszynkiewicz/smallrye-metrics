@@ -14,7 +14,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package io.smallrye.metrics;
+package io.smallrye.metrics.deployment;
 
 import io.smallrye.metrics.runtime.ConfigReader;
 import io.smallrye.metrics.runtime.ExtendedMetadata;
@@ -53,7 +53,8 @@ public class BaseMetricsInitializer {
      * along with their metadata.
      */
     private void initBaseAndVendorConfiguration() {
-        InputStream is = getClass().getResourceAsStream("mapping.yml");
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        InputStream is = contextClassLoader.getResourceAsStream("/io/smallrye/metrics/mapping.yml");
 
         if (is != null) {
             ConfigReader cr = new ConfigReader();

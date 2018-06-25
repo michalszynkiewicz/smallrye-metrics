@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.smallrye.metrics;
+package io.smallrye.metrics.deployment;
 
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.annotation.Metric;

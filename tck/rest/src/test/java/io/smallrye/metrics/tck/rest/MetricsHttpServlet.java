@@ -16,7 +16,7 @@
  */
 package io.smallrye.metrics.tck.rest;
 
-import io.smallrye.metrics.runtime.MetricsEndpointBase;
+import io.smallrye.metrics.runtime.MetricsRequestHandler;
 
 import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
@@ -54,5 +54,5 @@ public class MetricsHttpServlet extends HttpServlet {
     }
 
     @Inject
-    private MetricsEndpointBase endpointBase;
+    private MetricsRequestHandler endpointBase;
 }

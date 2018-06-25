@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.smallrye.metrics;
+package io.smallrye.metrics.deployment;
 
 import io.smallrye.metrics.runtime.OriginTrackedMetadata;
 import org.eclipse.microprofile.metrics.Metadata;

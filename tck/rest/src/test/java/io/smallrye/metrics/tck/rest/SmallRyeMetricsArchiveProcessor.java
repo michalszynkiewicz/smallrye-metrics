@@ -17,7 +17,6 @@ package io.smallrye.metrics.tck.rest;
 
 import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.config.inject.ConfigExtension;
-import io.smallrye.metrics.BaseMetricsInitializer;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.jboss.arquillian.container.test.spi.TestDeployment;
 import org.jboss.arquillian.container.test.spi.client.deployment.ProtocolArchiveProcessor;
@@ -52,7 +51,6 @@ public class SmallRyeMetricsArchiveProcessor implements ProtocolArchiveProcessor
 
         war.addClass(SmallRyeBeanArchiveHandler.class);
         war.addClass(MetricsHttpServlet.class);
-        war.addClass(BaseMetricsInitializer.class);
         war.addAsResource("io/smallrye/metrics/mapping.yml", "io/smallrye/metrics/mapping.yml");
         war.addAsServiceProvider(BeanArchiveHandler.class, SmallRyeBeanArchiveHandler.class);
         war.addAsServiceProvider(Extension.class, ConfigExtension.class);
