@@ -37,7 +37,6 @@ public class MetricsHttpServlet extends HttpServlet {
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         doGet(req, resp);
-
     }
 
     @Override
@@ -46,7 +45,7 @@ public class MetricsHttpServlet extends HttpServlet {
         String method = request.getMethod();
         Stream<String> acceptHeaders = Collections.list(request.getHeaders("Accept")).stream();
         
-        endpointBase.handleRequest(requestPath, method, acceptHeaders, (status, message, headers) -> {
+        metricsHandler.handleRequest(requestPath, method, acceptHeaders, (status, message, headers) -> {
             headers.forEach(response::addHeader);
             response.setStatus(status);
             response.getWriter().write(message);
@@ -54,5 +53,5 @@ public class MetricsHttpServlet extends HttpServlet {
     }
 
     @Inject
-    private MetricsRequestHandler endpointBase;
+    private MetricsRequestHandler metricsHandler;
 }

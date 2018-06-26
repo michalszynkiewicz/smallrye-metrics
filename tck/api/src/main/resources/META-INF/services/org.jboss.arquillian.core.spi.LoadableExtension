@@ -1,1 +1,1 @@
-io.smallrye.metrics.tck.api.SmallRyeMetricsExtension
+io.smallrye.metrics.tck.api.MetricsExtension

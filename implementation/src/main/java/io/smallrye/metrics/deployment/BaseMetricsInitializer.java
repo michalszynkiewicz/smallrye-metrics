@@ -44,6 +44,8 @@ import java.util.Optional;
 @ApplicationScoped
 public class BaseMetricsInitializer {
 
+    public static final String MAPPING_FILE_PATH = "/io/smallrye/metrics/mapping.yml";
+
     public void initialize(@Observes @Initialized(ApplicationScoped.class) Object ignored) {
         initBaseAndVendorConfiguration();
     }
@@ -53,8 +55,11 @@ public class BaseMetricsInitializer {
      * along with their metadata.
      */
     private void initBaseAndVendorConfiguration() {
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        InputStream is = contextClassLoader.getResourceAsStream("/io/smallrye/metrics/mapping.yml");
+
+        InputStream is = getClass().getResourceAsStream(MAPPING_FILE_PATH);
+        if (is == null) {
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(MAPPING_FILE_PATH);
+        }
 
         if (is != null) {
             ConfigReader cr = new ConfigReader();

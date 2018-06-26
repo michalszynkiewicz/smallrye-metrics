@@ -33,7 +33,7 @@ import java.io.File;
  * <br>
  * Date: 6/19/18
  */
-public class SmallRyeMetricsArchiveProcessor implements ProtocolArchiveProcessor {
+public class ArchiveProcessor implements ProtocolArchiveProcessor {
     @Override
     public void process(TestDeployment testDeployment, Archive<?> protocolArchive) {
         WebArchive war = (WebArchive)protocolArchive;

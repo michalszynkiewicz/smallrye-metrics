@@ -16,24 +16,19 @@
 package io.smallrye.metrics.tck.api;
 
 import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
-import org.jboss.arquillian.test.spi.TestClass;
-import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.arquillian.core.spi.LoadableExtension;
 
 /**
+ *
  * @author Michal Szynkiewicz, michal.l.szynkiewicz@gmail.com
  * <br>
- * Date: 6/19/18
+ * Date: 6/25/18
  */
-public class SmallRyeMetricsArchiveProcessor implements ApplicationArchiveProcessor {
+public class MetricsExtension implements LoadableExtension {
 
     @Override
-    public void process(Archive<?> applicationArchive, TestClass testClass) {
-        if (applicationArchive instanceof JavaArchive) {
-            JavaArchive archive = (JavaArchive)applicationArchive;
-            archive.addAsResource("io/smallrye/metrics/mapping.yml", "/io/smallrye/metrics/mapping.yml");
-        } else {
-            throw new IllegalStateException(this.getClass().getCanonicalName() + " works only with JavaArchives");
-        }
+    public void register(ExtensionBuilder extensionBuilder) {
+        extensionBuilder.service(ApplicationArchiveProcessor.class, ArchiveProcessor.class);
     }
+
 }
